@@ -26,14 +26,15 @@ paru -S python-ecdysys
 *Must be set
 
 ## Usage
-```shell
-usage: ecdysys [-h] [-v] [-l] [-u]
+```
+usage: ecdysys [-h] [-v] [-l] [-u] [--no-spinner]
 
 Python CLI to update your system packages
 
 options:
-  -h, --help    show this help message and exit
-  -v, --version  Prints program's version number
-  -l, --list    List available updates
-  -u, --update  Update package
+  -h, --help     show this help message and exit
+  -v, --version  Print version
+  -l, --list     List available updates
+  -u, --update   Update package
+  --no-spinner   Doesn't show spinner when listing updates
 ```

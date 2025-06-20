@@ -1,9 +1,10 @@
 import os, subprocess, shutil
 import colorama as clr
 import toml
+from yaspin import yaspin, Spinner
 
 clr.init(autoreset=True)
-
+Snake_spinner = Spinner(["-_-_-*   ", " _-_-_*  ", "  -_-_-* ", "   _-_-_*", "  *-_-_- ", " *_-_-_  ", "*-_-_-   "], 100)
 def print_err(msg): print(clr.Fore.RED + f":: ERROR : {msg}")
 def print_warn(msg): print(clr.Fore.YELLOW + f":: WARN : {msg}")
 
@@ -48,6 +49,7 @@ def prepare_pkgms():
             # Check if the package manager is installed
             try:
                 subprocess.run([pkgm, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                if pkgm == "pacman": subprocess.run(["checkupdates", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except FileNotFoundError:
                 Pkgms.remove(pkgm)
                 if not err_missing_msg:
@@ -56,22 +58,34 @@ def prepare_pkgms():
                     err_missing_msg += f", {pkgm}"
     return Pkgms,f"{err_unsupported_msg}\n{err_missing_msg}" if err_unsupported_msg or err_missing_msg else str()
 
-def check_update(pkgms, err_msg):
+
+def check_update(pkgms, err_msg, no_spinner):
     """checks and returns update from all package managers in the list"""
-    update_list = str()
     if err_msg: print_err(clr.Fore.RED + err_msg)
-    for pkgm in pkgms:
+    update_list = str()
+
+    # Probably not the best way to do this but idc it works (all that for the no spinner option)
+    def switch_pkgm():
+        tmp_list = str()
         match pkgm:
             case "pacman":
                 pacman_upd = subprocess.run(shutil.which("checkupdates"), capture_output=True, text=True)
-                update_list += clr.Fore.CYAN + "::Pacman updates::\n" + clr.Fore.RESET +  pacman_upd.stdout
+                tmp_list += clr.Fore.CYAN + "::Pacman updates::\n" + clr.Fore.RESET + pacman_upd.stdout
             case aur_helper if aur_helper == Slc_aur:
                 aur_upd = subprocess.run([shutil.which(Slc_aur), "-Qua"], capture_output=True, text=True)
-                update_list += clr.Fore.CYAN + "::Aur updates::\n" + clr.Fore.RESET + aur_upd.stdout
+                tmp_list += clr.Fore.CYAN + "::Aur updates::\n" + clr.Fore.RESET + aur_upd.stdout
             case "flatpak":
                 flatpak_upd = subprocess.run([shutil.which("flatpak"), "remote-ls", "--updates"], capture_output=True, text=True)
-                update_list += clr.Fore.BLUE + "::Flatpak updates::\n" + clr.Fore.RESET + flatpak_upd.stdout
-    return update_list
+                tmp_list += clr.Fore.BLUE + "::Flatpak updates::\n" + clr.Fore.RESET + flatpak_upd.stdout
+        return tmp_list
+
+    for pkgm in pkgms:
+        if not no_spinner:
+            with yaspin(Snake_spinner, text=f"Fetching update for {pkgm.capitalize()}") as spinner:
+                update_list += f"{switch_pkgm()}"
+                spinner.write(clr.Fore.GREEN + f"✓ {pkgm.capitalize()}")
+        else: update_list += f"{switch_pkgm()}"
+    return update_list if update_list else "No updates"
 
 def update(pkgms, err_msg):
     """update system"""
