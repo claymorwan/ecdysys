@@ -30,6 +30,7 @@ paru -S python-ecdysys
 | `aur_helper`             | aur helper to use (`pacman` must be set in `pkg_managers` | any of the supported aur helper (string)              | `"paru"`                      |
 | `post_install_script`    | path to script ot run after installation                  | path to file (string)                                 | `path/to/script`              |
 | `args_<package manager>` | arguments for any of the selected package manager         | string                                                | `args_pacman = "--noconfirm"` |
+| `sudobin`                | sudobin executable ame or path                            | string                                                | `sudo-rs`; `/usr/bin/sudo-rs` |
 
 *Must be set
 
