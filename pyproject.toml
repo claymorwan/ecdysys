@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ecdysys"
-version = "0.1.5"
+version = "0.1.6"
 description = "Python CLI to update your system packages"
 readme = "README.md"
 license = "MIT"
@@ -16,11 +16,8 @@ classifiers = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "build>=1.2.2.post1",
     "colorama==0.4.6",
-    "hatchling>=1.27.0",
     "toml==0.10.2",
-    "twine>=6.1.0",
     "yaspin>=3.1.0",
 ]
 

@@ -1,3 +1,7 @@
+# v0.1.6
+- Dnf support
+- Custom sudobin support
+
 # v0.1.5
 - Added a loading animation when listing updates
 - `--no-spinner` argument to not show spinner
