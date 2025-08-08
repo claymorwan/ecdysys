@@ -4,7 +4,6 @@ import os
 # Opens config file
 try:
     cfg_path = os.path.expanduser("~") + "/.config/ecdysys/config.toml"
-    print(cfg_path)
     with open(cfg_path, "rb") as c:
         cfg = toml.load(c)
 except FileNotFoundError:

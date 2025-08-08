@@ -1,3 +1,6 @@
+# v0.1.8
+- removed a print that i forgot to remove bruh
+
 # v0.1.7
 - just changed some file structure stuff and changed the line to get config file path
 
