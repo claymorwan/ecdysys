@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ecdysys"
-version = "0.1.8"
+version = "0.1.9"
 description = "Python CLI to update your system packages"
 readme = "README.md"
 license = "MIT"

@@ -1,3 +1,6 @@
+# v0.1.9
+fixed some bs i broke
+
 # v0.1.8
 - removed a print that i forgot to remove bruh
 
