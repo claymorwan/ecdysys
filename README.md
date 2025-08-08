@@ -1,4 +1,5 @@
 # Ecdysys
+[![](https://img.shields.io/github/v/release/claymorwan/ecdysys)](https://GitHub.com/claymorwan/ecdysys)
 
 Little CLI tool to print and update system
 Currently supported package managers are:
@@ -6,12 +7,6 @@ Currently supported package managers are:
 - `yay` and `paru` (aur support)
 - `dnf`
 - `flatpak`
-
-[<img alt="github" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/github_vector.svg">](https://github.com/claymorwan/ecdysys)
-[<img alt="pypi" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/pypi_vector.svg">](https://pypi.org/project/ecdysys/)
-[<img alt="aur" height="56" src="./assets/cozy_vector.svg">](https://aur.archlinux.org/packages/python-ecdysys)
-
-
 
 ## Installation
 ### From Pypi

@@ -1,3 +1,6 @@
+# v0.1.7
+- just changed some file structure stuff and changed the line to get config file path
+
 # v0.1.6
 - Dnf support
 - Custom sudobin support

@@ -1,5 +1,5 @@
 import argparse, importlib.metadata
-from ecdysys.utils import check_update, prepare_pkgms, update
+from .utils.main import check_update, prepare_pkgms, update
 
 def main() -> None:
 

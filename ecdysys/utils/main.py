@@ -1,7 +1,8 @@
 import os, subprocess, shutil
 import colorama as clr
-import toml
 from yaspin import yaspin, Spinner
+
+import ecdysys.utils.config as cfg
 
 clr.init(autoreset=True)
 Snake_spinner = Spinner(["-_-_-*   ", " _-_-_*  ", "  -_-_-* ", "   _-_-_*", "  *-_-_- ", " *_-_-_  ", "*-_-_-   "], 100)
@@ -10,43 +11,19 @@ def print_warn(msg): print(clr.Fore.YELLOW + f":: WARN : {msg}")
 
 Supported_aur_helpers = ["yay", "paru"]
 Supported_pkg_managers = ["pacman", "flatpak", "dnf"] + Supported_aur_helpers
-# Opens config file
-try:
-    cfg_path = os.getenv("XDG_CONFIG_HOME") + "/ecdysys/config.toml"
-    with open(cfg_path) as c:
-        cfg = toml.load(c)
-except FileNotFoundError:
-    print_err(f"No config.toml found at {cfg_path}")
-    exit()
-
-# get values from config file
-#- Packages managers
-try: Pkgms = cfg['pkg_managers']
-except KeyError: print_err("No package managers found in config.toml in `pkg_manager`"); exit()
-# - Aur helpers
-try: Slc_aur =  cfg['aur_helper']
-except KeyError: Slc_aur =  str()
-#- Post-install scripts
-try: Post_install_script = cfg['post_install_script']
-except KeyError: Post_install_script = str()
-#- Sudo bin
-try: Sudobin = cfg['sudobin'] if "/" in cfg['sudobin'] else shutil.which(cfg['sudobin'])
-except KeyError: Sudobin = shutil.which("sudo")
-#- Insert aur helper in list if pacman and aur helper are set
-if "pacman" in Pkgms and Slc_aur: Pkgms.insert(Pkgms.index("pacman") + 1, Slc_aur)
 
 def prepare_pkgms():
     """checks and filters if the package managers exists"""
     err_unsupported_msg = str()
     err_missing_msg = str()
     pkgms_path = []
-    if any(map(lambda v: v in Supported_aur_helpers, Pkgms)) and "pacman" not in Pkgms:
+    if any(map(lambda v: v in Supported_aur_helpers, cfg.Pkgms)) and "pacman" not in cfg.Pkgms:
         print_warn("Aur helper selected but not pacman")
-        Pkgms.remove(Slc_aur)
-    for pkgm in Pkgms:
+        cfg.Pkgms.remove(cfg.Slc_aur)
+    for pkgm in cfg.Pkgms:
         # Check if package manager is supported
         if pkgm not in Supported_pkg_managers:
-            Pkgms.remove(pkgm)
+            cfg.Pkgms.remove(pkgm)
             err_unsupported_msg += f"Unsupported package manager: {pkgm}" if not err_unsupported_msg else f", {pkgm}"
         else:
             # Check if the package manager is installed
@@ -54,12 +31,12 @@ def prepare_pkgms():
                 subprocess.run([pkgm, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 if pkgm == "pacman": subprocess.run(["checkupdates", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except FileNotFoundError:
-                Pkgms.remove(pkgm)
+                cfg.Pkgms.remove(pkgm)
                 if not err_missing_msg:
                     err_missing_msg += f"Missing package managers: {pkgm}"
                 else:
                     err_missing_msg += f", {pkgm}"
-    return Pkgms,f"{err_unsupported_msg}\n{err_missing_msg}" if err_unsupported_msg or err_missing_msg else str()
+    return cfg.Pkgms,f"{err_unsupported_msg}\n{err_missing_msg}" if err_unsupported_msg or err_missing_msg else str()
 
 
 def check_update(pkgms, err_msg, no_spinner):
@@ -74,8 +51,8 @@ def check_update(pkgms, err_msg, no_spinner):
             case "pacman":
                 pacman_upd = subprocess.run(shutil.which("checkupdates"), capture_output=True, text=True)
                 upd_list += clr.Fore.CYAN + "::Pacman updates::\n" + clr.Fore.RESET + pacman_upd.stdout if pacman_upd else ""
-            case aur_helper if aur_helper == Slc_aur:
-                aur_upd = subprocess.run([shutil.which(Slc_aur), "-Qua"], capture_output=True, text=True)
+            case aur_helper if aur_helper == cfg.Slc_aur:
+                aur_upd = subprocess.run([shutil.which(cfg.Slc_aur), "-Qua"], capture_output=True, text=True)
                 upd_list += clr.Fore.CYAN + "::Aur updates::\n" + clr.Fore.RESET + aur_upd.stdout if aur_upd else ""
             case "dnf":
                 dnf_upd = subprocess.run([shutil.which("dnf"), "check-update"], capture_output=True, text=True)
@@ -102,15 +79,15 @@ def update(pkgms, err_msg):
         except KeyError: args = str()
         match pkgm:
             case "pacman":
-                if Slc_aur:
-                    cmd = f"{shutil.which(Slc_aur)} -Syu {args}"
+                if cfg.Slc_aur:
+                    cmd = f"{shutil.which(cfg.Slc_aur)} -Syu {args}"
                     print(clr.Fore.CYAN + f"::Arch update::\n{cmd}")
                     os.system(cmd)
-                    pkgms.remove(Slc_aur)
+                    pkgms.remove(cfg.Slc_aur)
                 else:
                     cmd = f"{shutil.which("pacman")} -Syu {args}"
                     print(clr.Fore.CYAN + f"::Pacman update::\n{shutil.which("pacman")} -Syu")
-                    os.system(Sudobin + cmd)
+                    os.system(cfg.Sudobin + cmd)
             case "dnf":
                 cmd = f"{shutil.which("dnf")} update {args}"
                 print(clr.Fore.BLUE + f"::Dnf update::\n{cmd}")
@@ -119,7 +96,7 @@ def update(pkgms, err_msg):
                 cmd = f"{shutil.which("flatpak")} update {args}"
                 print(clr.Fore.BLUE + f"::Flatpak update::\n{cmd}")
                 os.system(cmd)
-    if Post_install_script:
-        print(clr.Fore.GREEN + f"::Custom post install script::\n{Post_install_script}")
-        os.system(Post_install_script)
+    if cfg.Post_install_script:
+        print(clr.Fore.GREEN + f"::Custom post install script::\n{cfg.Post_install_script}")
+        os.system(cfg.Post_install_script)
     print(clr.Back.BLUE + "::Done::")
